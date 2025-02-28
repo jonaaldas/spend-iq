@@ -8,6 +8,7 @@ import { ArrowRight, BanknoteIcon, Bot, LineChart, Mail, MessageSquare, User, Wa
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
+import {submitWaitlist} from './server_actions/submit_waitlist'
 
 export default function WaitlistPage() {
   const [email, setEmail] = useState("")
@@ -17,14 +18,11 @@ export default function WaitlistPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
-
-    // Simulate API call
-    setTimeout(() => {
-      toast("You are in the list")
-      setIsSubmitting(false)
-      setEmail("")
-      setName("")
-    }, 1500)
+    await submitWaitlist(email, name)
+    toast.success("You are in the list")
+    setIsSubmitting(false)
+    setEmail("")
+    setName("")
   }
 
   return (
@@ -33,9 +31,9 @@ export default function WaitlistPage() {
         <main className="flex-1 flex flex-col items-center justify-center max-w-2xl mx-auto w-full py-12">
           <div className="text-center mb-8">
             <h1 className="text-4xl md:text-5xl font-bold text-white mb-3">
-              Smart Finance Tracking{" "}
+              Know where your money goes with {" "}
               <span className="bg-gradient-to-r from-pink-500 via-purple-500 to-blue-600 bg-clip-text text-transparent">
-                Reimagined
+                Spend IQ
               </span>
             </h1>
             <p className="text-zinc-300 text-lg md:text-xl">
@@ -57,7 +55,7 @@ export default function WaitlistPage() {
                     text: "Get notified when you're about to exceed your budgets",
                   },
                 ].map((item, i) => (
-                  <div key={i} className="flex items-start">
+                  <div key={i} className="flex items-center">
                     <div className="mr-3 mt-0.5 bg-zinc-900 p-2 rounded-full text-purple-400">{item.icon}</div>
                     <p className="text-zinc-200">{item.text}</p>
                   </div>
@@ -111,7 +109,7 @@ export default function WaitlistPage() {
         </main>
 
         <footer className="text-center text-zinc-500 text-sm pb-8">
-          <p>© {new Date().getFullYear()} Finance Tracker. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Spend IQ. All rights reserved.</p>
         </footer>
       </div>
     </div>
