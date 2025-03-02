@@ -14,7 +14,7 @@ import Link from 'next/link'
 import { useState } from 'react'
 
 export default function ConnectPage() {
-  const [isConnected, setIsConnected] = useState(false)
+  const [isConnected] = useState(false)
   return (
     <>
       {!isConnected ? (
@@ -22,18 +22,18 @@ export default function ConnectPage() {
           <CardHeader>
             <CardTitle>Connect Your Account</CardTitle>
             <CardDescription>
-              Link your bank accounts securely using Plaid's trusted connection service
+              Link your bank accounts securely using Plaid&apos;s trusted connection service
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="rounded-lg border bg-muted/50 p-4">
               <h3 className="mb-2 font-medium">How it works:</h3>
               <ol className="ml-5 list-decimal space-y-2 text-sm text-muted-foreground">
-                <li>Click the "Connect Your Account" button below</li>
+                <li>Click the &quot;Connect Your Account&quot; button below</li>
                 <li>Select your bank from the list of supported institutions</li>
                 <li>Securely log in to your bank using your existing credentials</li>
                 <li>Choose which accounts you want to connect</li>
-                <li>You'll be redirected back once the connection is complete</li>
+                <li>You&apos;ll be redirected back once the connection is complete</li>
               </ol>
             </div>
 
@@ -52,11 +52,11 @@ export default function ConnectPage() {
             <Button className="w-full">Connect Your Account</Button>
             <p className="text-center text-xs text-muted-foreground">
               By connecting your account, you agree to our{' '}
-              <Link href="#" className="underline underline-offset-2">
+              <Link href="/terms" className="underline underline-offset-2">
                 Terms of Service
               </Link>{' '}
               and{' '}
-              <Link href="#" className="underline underline-offset-2">
+              <Link href="/privacy" className="underline underline-offset-2">
                 Privacy Policy
               </Link>
             </p>
