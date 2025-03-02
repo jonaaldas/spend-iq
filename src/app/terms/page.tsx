@@ -89,9 +89,9 @@ export default function TermsPage() {
                 7. Limitations of Liability
               </h2>
               <p className="text-zinc-300 mb-4">
-                SPEND IQ is provided "as is" without warranties of any kind. We are not liable for
-                any direct, indirect, incidental, special, or consequential damages that result from
-                the use of, or inability to use, our services.
+                SPEND IQ is provided &quot;as is&quot; without warranties of any kind. We are not
+                liable for any direct, indirect, incidental, special, or consequential damages that
+                result from the use of, or inability to use, our services.
               </p>
 
               <h2 className="text-xl font-semibold text-white mt-8 mb-4">

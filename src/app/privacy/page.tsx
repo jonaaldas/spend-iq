@@ -140,8 +140,8 @@ export default function PrivacyPage() {
               </h2>
               <p className="text-zinc-300 mb-4">
                 We may update our Privacy Policy from time to time. We will notify you of any
-                changes by posting the new Privacy Policy on this page and updating the "Last
-                Updated" date.
+                changes by posting the new Privacy Policy on this page and updating the &quot;Last
+                Updated&quot; date.
               </p>
 
               <h2 className="text-xl font-semibold text-white mt-8 mb-4">8. Contact Information</h2>
