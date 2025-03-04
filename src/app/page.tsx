@@ -1,7 +1,7 @@
 'use client'
 
 import type React from 'react'
-
+import { ThemeToggle } from '@/components/theme-toggle'
 import { useState } from 'react'
 import Link from 'next/link'
 import {
@@ -39,20 +39,23 @@ export default function WaitlistPage() {
   }
 
   return (
-    <div className="dark min-h-screen bg-black relative overflow-hidden">
+    <div className="min-h-screen bg-background text-foreground relative overflow-hidden">
       <div className="container relative z-10 mx-auto px-4 py-8 flex flex-col min-h-screen">
+        <div className="flex justify-end w-full">
+          <ThemeToggle />
+        </div>
         <main className="flex-1 flex flex-col items-center justify-center max-w-2xl mx-auto w-full py-12">
           <div className="text-center mb-8">
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-3">
+            <h1 className="text-4xl md:text-5xl font-bold mb-3">
               Know where your money goes with{' '}
               <span className="bg-gradient-to-r from-pink-500 via-purple-500 to-blue-600 bg-clip-text text-transparent">
                 SPEND IQ
               </span>
             </h1>
-            <p className="text-zinc-300 text-lg md:text-xl mb-2">
+            <p className="text-muted-foreground text-lg md:text-xl mb-2">
               Join the waitlist for the next generation expense tracker
             </p>
-            <p className="text-zinc-400 text-sm">
+            <p className="text-muted-foreground text-sm">
               <span className="inline-flex items-center">
                 <Code className="h-4 w-4 mr-1" />
                 Open source
@@ -97,41 +100,41 @@ export default function WaitlistPage() {
                   },
                 ].map((item, i) => (
                   <div key={i} className="flex items-center">
-                    <div className="mr-3 mt-0.5 bg-zinc-900 p-2 rounded-full text-purple-400">
+                    <div className="mr-3 mt-0.5 bg-secondary p-2 rounded-full text-purple-400">
                       {item.icon}
                     </div>
-                    <p className="text-zinc-200">{item.text}</p>
+                    <p className="text-foreground">{item.text}</p>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="bg-zinc-900/40 backdrop-blur-sm p-6 rounded-xl border border-zinc-800">
-              <h3 className="text-xl font-semibold text-white mb-4">Join the Waitlist</h3>
-              <p className="text-zinc-400 mb-6">
+            <div className="bg-card p-6 rounded-xl border shadow-sm">
+              <h3 className="text-xl font-semibold mb-4">Join the Waitlist</h3>
+              <p className="text-muted-foreground mb-6">
                 Be the first to know when we launch and get early access.
               </p>
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="relative">
-                  <User className="absolute left-3 top-3 h-5 w-5 text-zinc-500" />
+                  <User className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
                   <Input
                     placeholder="Your name"
                     value={name}
                     onChange={e => setName(e.target.value)}
-                    className="pl-10 bg-zinc-800/50 border-zinc-700 text-zinc-300 h-12"
+                    className="pl-10 h-12"
                     required
                   />
                 </div>
 
                 <div className="relative">
-                  <Mail className="absolute left-3 top-3 h-5 w-5 text-zinc-500" />
+                  <Mail className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
                   <Input
                     placeholder="Your email"
                     type="email"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
-                    className="pl-10 bg-zinc-800/50 border-zinc-700 text-zinc-300 h-12"
+                    className="pl-10 h-12"
                     required
                   />
                 </div>
@@ -148,19 +151,19 @@ export default function WaitlistPage() {
                 </Button>
               </form>
 
-              <p className="text-zinc-500 text-sm mt-4 text-center">
+              <p className="text-muted-foreground text-sm mt-4 text-center">
                 We respect your privacy. No spam, ever.
               </p>
             </div>
           </div>
         </main>
 
-        <footer className="text-center text-zinc-500 text-sm pb-8">
+        <footer className="text-center text-muted-foreground text-sm pb-8">
           <div className="flex justify-center space-x-4 mb-2">
-            <Link href="/terms" className="hover:text-white transition-colors">
+            <Link href="/terms" className="hover:text-foreground transition-colors">
               Terms of Service
             </Link>
-            <Link href="/privacy" className="hover:text-white transition-colors">
+            <Link href="/privacy" className="hover:text-foreground transition-colors">
               Privacy Policy
             </Link>
           </div>
