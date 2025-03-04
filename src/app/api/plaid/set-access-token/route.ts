@@ -14,12 +14,10 @@ export async function POST(request: Request) {
     const formData = await request.formData()
     const public_token = formData.get('public_token') as string
 
-    // Exchange public token for an access token
     const tokenResponse = await client.itemPublicTokenExchange({
       public_token,
     })
 
-    console.log(tokenResponse)
     const ACCESS_TOKEN = tokenResponse.data.access_token
     const ITEM_ID = tokenResponse.data.item_id
 

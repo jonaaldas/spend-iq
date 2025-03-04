@@ -26,6 +26,37 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    // Check if a refresh was requested
+    const url = new URL(request.url)
+    const refresh = url.searchParams.get('refresh') === 'true'
+
+    // Only use cache if not refreshing
+    if (!refresh) {
+      // Check if transactions, accounts, and institutions are cached
+      const cachedTransactions = await redis.get(`plaid:${userId}:transactions`)
+      const cachedAccounts = await redis.get(`plaid:${userId}:accounts`)
+      const cachedInstitutions = await redis.get(`plaid:${userId}:institutions`)
+
+      // Only use cache if all data exists and arrays aren't empty
+      if (cachedTransactions && cachedAccounts && cachedInstitutions) {
+        const transactions = JSON.parse(cachedTransactions)
+        const accounts = JSON.parse(cachedAccounts)
+        const institutions = JSON.parse(cachedInstitutions)
+
+        // Make sure we have actual data before returning the cached version
+        if (transactions.length > 0 && accounts.length > 0) {
+          console.log('Returning cached financial data')
+          return NextResponse.json({
+            transactions,
+            accounts,
+            institutions,
+          })
+        }
+      }
+    } else {
+      console.log('Cache refresh requested, fetching new data')
+    }
+
     // Get all items for this user
     const itemsJson = await redis.get(`plaid:${userId}:items`)
     if (!itemsJson) {
@@ -106,6 +137,29 @@ export async function GET(request: Request) {
         console.error(`Error fetching data for item ${item.item_id}:`, error)
         // Continue with other items even if one fails
       }
+    }
+
+    // Only cache if we have data to cache
+    if (allTransactions.length > 0 && allAccounts.length > 0) {
+      const institutionsArray = Object.values(institutions)
+
+      // Cache the data with a 1-hour expiration (3600 seconds)
+      const CACHE_TTL = 3600
+      await redis.set(
+        `plaid:${userId}:transactions`,
+        JSON.stringify(allTransactions),
+        'EX',
+        CACHE_TTL
+      )
+      await redis.set(`plaid:${userId}:accounts`, JSON.stringify(allAccounts), 'EX', CACHE_TTL)
+      await redis.set(
+        `plaid:${userId}:institutions`,
+        JSON.stringify(institutionsArray),
+        'EX',
+        CACHE_TTL
+      )
+
+      console.log('Financial data cached successfully')
     }
 
     return NextResponse.json({

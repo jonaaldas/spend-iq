@@ -22,3 +22,31 @@ export function formatCurrency(amount: number, currency = 'USD'): string {
     maximumFractionDigits: 2,
   }).format(absAmount)
 }
+
+// Format a date string to a more readable format
+export function formatDate(dateString: string): string {
+  // Use a fixed locale and options for consistent server/client rendering
+  // Avoid relying on user's local settings
+  const date = new Date(dateString)
+
+  // Format manually to avoid locale issues
+  const months = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ]
+  const month = months[date.getMonth()]
+  const day = date.getDate()
+  const year = date.getFullYear()
+
+  return `${month} ${day}, ${year}`
+}

@@ -24,107 +24,54 @@ import { Plus, RefreshCcw, Unlink, ExternalLink } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
 import { toast } from 'sonner'
-
-interface Account {
-  account_id: string
-  balances: {
-    available: number | null
-    current: number
-    iso_currency_code: string
-    limit: number | null
-  }
-  mask: string
-  name: string
-  official_name: string | null
-  type: string
-  subtype: string
-  item_id: string
-  institution?: {
-    name: string
-    institution_id: string
-    logo?: string
-  }
-}
-
-interface Institution {
-  institution_id: string
-  name: string
-  logo?: string
-  accounts: Account[]
-  itemId: string
-}
+import { useFinancialData, type Account, type Institution } from '@/hooks/use-financial-data'
 
 export function AccountsView() {
-  const [institutions, setInstitutions] = useState<Institution[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [isRefreshing, setIsRefreshing] = useState(false)
+  // Use the shared financial data hook
+  const { accounts, institutions, isLoading, isRefreshing, error, refreshData } = useFinancialData()
 
-  const fetchAccounts = async () => {
-    try {
-      setIsLoading(true)
-      const response = await fetch('/api/plaid/get-transactions')
+  // Local state for institutions grouped by accounts
+  const [groupedInstitutions, setGroupedInstitutions] = useState<Institution[]>([])
 
-      if (!response.ok) {
-        if (response.status === 404) {
-          setError('No linked bank accounts found. Please connect an account first.')
-        } else {
-          const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
-          setError(errorData.error || 'Could not load your accounts. Please try again later.')
-        }
-        return
-      }
-
-      const data = await response.json()
-
-      // Process institutions and accounts from the response
-      const accounts = data.accounts || []
-      const apiInstitutions = data.institutions || []
-
+  // Process accounts and institutions when they change
+  useEffect(() => {
+    if (accounts.length > 0 && institutions.length > 0) {
       // Group accounts by institution_id
-      const groupedInstitutions: Record<string, Institution> = {}
+      const groupedMap: Record<string, Institution> = {}
 
       // First, create institution entries
-      apiInstitutions.forEach((inst: any) => {
-        groupedInstitutions[inst.institution_id] = {
+      institutions.forEach(inst => {
+        groupedMap[inst.institution_id] = {
           institution_id: inst.institution_id,
           name: inst.name,
+          logo: inst.logo,
           accounts: [],
           itemId: '', // Will be populated when we process accounts
         }
       })
 
       // Then add accounts to their institutions
-      accounts.forEach((account: Account) => {
-        if (account.institution && groupedInstitutions[account.institution.institution_id]) {
+      accounts.forEach(account => {
+        if (account.institution && groupedMap[account.institution.institution_id]) {
           // Add the account to its institution
-          groupedInstitutions[account.institution.institution_id].accounts.push(account)
+          groupedMap[account.institution.institution_id].accounts.push(account)
           // Set the itemId if not already set
-          if (!groupedInstitutions[account.institution.institution_id].itemId) {
-            groupedInstitutions[account.institution.institution_id].itemId = account.item_id
+          if (!groupedMap[account.institution.institution_id].itemId) {
+            groupedMap[account.institution.institution_id].itemId = account.item_id
           }
         }
       })
 
-      setInstitutions(Object.values(groupedInstitutions))
-      setError(null)
-    } catch (err) {
-      console.error('Error fetching accounts:', err)
-      setError('Could not load your accounts. Please try again later.')
-    } finally {
-      setIsLoading(false)
-      setIsRefreshing(false)
+      // Create stable output - convert to array and sort by institution name
+      const processedInstitutions = Object.values(groupedMap).sort((a, b) => {
+        return a.name.localeCompare(b.name)
+      })
+
+      setGroupedInstitutions(processedInstitutions)
+    } else {
+      setGroupedInstitutions([])
     }
-  }
-
-  useEffect(() => {
-    fetchAccounts()
-  }, [])
-
-  const handleRefresh = () => {
-    setIsRefreshing(true)
-    fetchAccounts()
-  }
+  }, [accounts, institutions])
 
   const handleDisconnect = async (itemId: string, institutionName: string) => {
     if (
@@ -144,7 +91,9 @@ export function AccountsView() {
         if (response.ok) {
           toast.success(`Successfully disconnected ${institutionName}`)
           // Remove this institution from the state
-          setInstitutions(institutions.filter(inst => inst.itemId !== itemId))
+          setGroupedInstitutions(groupedInstitutions.filter(inst => inst.itemId !== itemId))
+          // Refresh data to ensure everything is in sync
+          refreshData()
         } else {
           const errorData = await response.json()
           toast.error(errorData.error || 'Failed to disconnect account')
@@ -156,12 +105,19 @@ export function AccountsView() {
     }
   }
 
-  if (isLoading && !isRefreshing) {
+  // Show loading state
+  if (isLoading) {
     return <AccountsSkeleton />
   }
 
-  if (error && !isRefreshing) {
+  // Show error state
+  if (error) {
     return <AccountsError message={error} />
+  }
+
+  // Show empty state if no institutions
+  if (groupedInstitutions.length === 0) {
+    return <NoAccounts />
   }
 
   return (
@@ -172,7 +128,7 @@ export function AccountsView() {
           <p className="text-muted-foreground">Manage your connected financial accounts</p>
         </div>
         <div className="flex space-x-3">
-          <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isRefreshing}>
+          <Button variant="outline" size="sm" onClick={refreshData} disabled={isRefreshing}>
             <RefreshCcw className="mr-2 h-4 w-4" />
             {isRefreshing ? 'Refreshing...' : 'Refresh'}
           </Button>
@@ -185,19 +141,15 @@ export function AccountsView() {
         </div>
       </div>
 
-      {institutions.length === 0 ? (
-        <NoAccounts />
-      ) : (
-        <div className="space-y-6">
-          {institutions.map(institution => (
-            <InstitutionCard
-              key={institution.institution_id}
-              institution={institution}
-              onDisconnect={() => handleDisconnect(institution.itemId, institution.name)}
-            />
-          ))}
-        </div>
-      )}
+      <div className="space-y-6">
+        {groupedInstitutions.map(institution => (
+          <InstitutionCard
+            key={institution.institution_id}
+            institution={institution}
+            onDisconnect={() => handleDisconnect(institution.itemId, institution.name)}
+          />
+        ))}
+      </div>
     </div>
   )
 }
@@ -210,7 +162,10 @@ function AccountsSkeleton() {
           <Skeleton className="h-8 w-64" />
           <Skeleton className="h-4 w-48 mt-2" />
         </div>
-        <Skeleton className="h-10 w-32" />
+        <div className="flex space-x-3">
+          <Skeleton className="h-9 w-32" />
+          <Skeleton className="h-9 w-32" />
+        </div>
       </div>
 
       <Card>
@@ -284,6 +239,9 @@ function InstitutionCard({
   const currencyCode =
     institution.accounts.length > 0 ? institution.accounts[0].balances.iso_currency_code : 'USD'
 
+  // Sort accounts by name for consistent rendering
+  const sortedAccounts = [...institution.accounts].sort((a, b) => a.name.localeCompare(b.name))
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -320,7 +278,7 @@ function InstitutionCard({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {institution.accounts.map(account => (
+            {sortedAccounts.map(account => (
               <TableRow key={account.account_id}>
                 <TableCell className="font-medium">
                   {account.name} {account.mask ? `(${account.mask})` : ''}
