@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { GalleryVerticalEnd } from 'lucide-react'
+import { PiggyBank, GalleryVerticalEnd, HomeIcon } from 'lucide-react'
 import { ThemeToggle } from '@/components/theme-toggle'
 import {
   Sidebar,
@@ -18,6 +18,12 @@ const data = {
     {
       title: 'Home',
       url: '/dashboard/home',
+      icon: <HomeIcon className="mr-2 h-4 w-4" />,
+    },
+    {
+      title: 'Accounts',
+      url: '/dashboard/accounts',
+      icon: <PiggyBank className="mr-2 h-4 w-4" />,
     },
   ],
 }
@@ -48,7 +54,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             {data.navMain.map(item => (
               <SidebarMenuItem key={item.title}>
                 <SidebarMenuButton asChild>
-                  <a href={item.url} className="font-medium">
+                  <a href={item.url} className="font-medium flex items-center">
+                    {item.icon}
                     {item.title}
                   </a>
                 </SidebarMenuButton>
